@@ -1,7 +1,7 @@
+import CalculatorPage from "./pages/CalculatorPage";
+
 function App() {
-  return (
-    <h1>University Aggregate Calculator</h1>
-  );
+  return <CalculatorPage />;
 }
 
 export default App;
