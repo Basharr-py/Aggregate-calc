@@ -18,7 +18,8 @@ function PutmeSection({
         label="POST-UTME Score"
         type="number"
         value={putmeScore}
-        onChange={(e) => setPutmeScore(e.target.value)}
+        min={0}
+        onChange={setPutmeScore}
       />
     </Card>
   );

@@ -18,7 +18,9 @@ function JambSection({
         label="JAMB Score"
         type="number"
         value={jambScore}
-        onChange={(e) => setJambScore(e.target.value)}
+        min={0}
+        max={400}
+        onChange={setJambScore}
       />
     </Card>
   );

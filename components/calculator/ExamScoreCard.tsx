@@ -5,6 +5,10 @@ import JambSection from "./JambSection";
 import PutmeSection from "./PutmeSection";
 import type { Subject } from "../../types/subject";
 
+import { FaClipboardList } from "react-icons/fa";
+
+
+
 
 type OlevelEntry = {
   subjectId: number | null;
@@ -37,7 +41,8 @@ function ExamScoreCard({
     setPutmeScore,
 }: Props) {
   return (
-    <Card title="Examination Scores">
+    <Card title="Examination Scores"
+      icon={<FaClipboardList />} >
       
 
       <OlevelSection

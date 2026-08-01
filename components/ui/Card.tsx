@@ -1,13 +1,33 @@
+import "./Card.css";
+
 type CardProps = {
   title: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
 };
 
-function Card({ title, children }: CardProps) {
+function Card({
+  title,
+  icon,
+  children,
+}: CardProps) {
   return (
-    <section>
-      <h2>{title}</h2>
-      <div>{children}</div>
+    <section className="card">
+      <div className="card-header">
+
+  <span className="card-icon">
+    {icon}
+  </span>
+
+  <h2 className="card-title">
+    {title}
+  </h2>
+
+</div>
+
+      <div className="card-content">
+        {children}
+      </div>
     </section>
   );
 }

@@ -1,3 +1,5 @@
+import "./Select.css";
+
 type Option = {
   value: string | number;
   label: string;
@@ -7,7 +9,7 @@ type SelectProps = {
   label: string;
   options: Option[];
   value?: string | number;
-  onChange?: (value: string | number) => void;
+  onChange?: (value: string) => void;
 };
 
 function Select({
@@ -17,27 +19,26 @@ function Select({
   onChange,
 }: SelectProps) {
   return (
-    <div>
-      <label>{label}</label>
+    <div className="select-group">
+      <label className="select-label">
+        {label}
+      </label>
 
       <select
-        value={String(value ?? "")}
-        onChange={(e) => {
-          const selected = options.find(
-            (option) => String(option.value) === e.target.value
-          );
-
-          if (selected) {
-            onChange?.(selected.value);
-          }
-        }}
+        className="select"
+        value={value ?? ""}
+        onChange={(e) =>
+          onChange?.(e.target.value)
+        }
       >
-        <option value="">Select {label}</option>
+        <option value="">
+          Select {label}
+        </option>
 
         {options.map((option) => (
           <option
             key={option.value}
-            value={String(option.value)}
+            value={option.value}
           >
             {option.label}
           </option>

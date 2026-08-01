@@ -13,3 +13,13 @@ export async function getCourses(universityId: number) {
 
     return response.data;
 }
+
+export async function getAdmissionFormula(
+    universityId: number
+) {
+    const response = await api.get(
+        `/universities/${universityId}/formula`
+    );
+
+    return response.data;
+}

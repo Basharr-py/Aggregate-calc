@@ -2,6 +2,8 @@ import Card from "../ui/Card";
 import Select from "../ui/Select";
 import type { University } from "../../types/university";
 import type { Course } from "../../types/course";
+import { FaUniversity } from "react-icons/fa";
+
 
 type Props = {
   universities: University[];
@@ -29,7 +31,8 @@ function UniversityCourseCard({
     };
 
     return (
-        <Card title="University & Course">
+        <Card title="University & Course"
+            icon={<FaUniversity />}>
         <Select
             label="University"
             options={universities.map((university) => ({
@@ -37,7 +40,9 @@ function UniversityCourseCard({
                 label: university.name,
             }))}
             value={selectedUniversity ?? ""}
-            onChange={handleUniversityChange}
+            onChange={(value) =>
+                onUniversityChange(Number(value))
+            }
             />
 
         <Select
@@ -47,7 +52,9 @@ function UniversityCourseCard({
                 label: course.name,
             }))}
             value={selectedCourse ?? ""}
-            onChange={handleCourseChange}
+            onChange={(value) =>
+            onCourseChange(Number(value))
+            }
         />
         </Card>
     );

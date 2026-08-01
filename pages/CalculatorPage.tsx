@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import "./CalculatorPage.css";
 
 import type { OlevelEntry } from "../types/olevel";
 import type { University } from "../types/university";
 import type { Course } from "../types/course";
 import type { Subject } from "../types/subject";
+import type { AdmissionFormula } from "../types/admissionFormula";
 
-import { getUniversities, getCourses } from "../api/university";
+import { getUniversities, getCourses, getAdmissionFormula } from "../api/university";
 import { getSubjects } from "../api/subject";
 import { calculateAggregate } from "../api/calculator";
 
@@ -17,17 +19,77 @@ function CalculatorPage() {
   const [universities, setUniversities] = useState<University[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-
+  const [isCalculating, setIsCalculating] =
+    useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState<number | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
   
   const [jambScore, setJambScore] = useState("");
   const [putmeScore, setPutmeScore] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [formula, setFormula] =
+    useState<AdmissionFormula | null>(null);
 
   const [aggregateResult, setAggregateResult] =
     useState<number | null>(null);
 
   const handleCalculate = async () => {
+    setErrorMessage("");
+
+if (!selectedUniversity) {
+    setErrorMessage("Please select a university.");
+    return;
+}
+
+if (!selectedCourse) {
+    setErrorMessage("Please select a course.");
+    return;
+}
+const completedSubjects = olevelSubjects.filter(
+    (subject) =>
+        subject.subjectId !== null &&
+        subject.grade !== ""
+);
+
+if (completedSubjects.length !== 5) {
+    setErrorMessage(
+        "Please select all five O'Level subjects and grades."
+    );
+    return;
+}
+
+if (!jambScore) {
+    setErrorMessage("Please enter your JAMB score.");
+    return;
+}
+
+if (Number(jambScore) < 0 || Number(jambScore) > 400) {
+    setErrorMessage("JAMB score must be between 0 and 400.");
+    return;
+}
+
+    if (
+        putmeScore &&
+        Number(putmeScore) < 0
+    ) {
+        setErrorMessage("POST-UTME score cannot be negative.");
+        return;
+    }
+    if (
+    formula &&
+    formula.putme_max_score !== null &&
+    Number(putmeScore) >
+        formula.putme_max_score
+) {
+    setErrorMessage(
+        `POST-UTME score cannot exceed ${formula.putme_max_score}.`
+    );
+
+    return;
+}
+
+
     const payload = {
         university_id: selectedUniversity,
         course_id: selectedCourse,
@@ -45,6 +107,7 @@ function CalculatorPage() {
     console.log(payload);
 
     try {
+        setIsCalculating(true);
         const result =
             await calculateAggregate(payload);
 
@@ -53,8 +116,17 @@ function CalculatorPage() {
         );
 
     } catch (error) {
-        console.error(error);
-    }
+
+    setErrorMessage(
+        "Unable to calculate aggregate."
+    );
+
+}
+finally {
+
+    setIsCalculating(false);
+
+}
 };
 
   const [olevelSubjects, setOlevelSubjects] = useState<OlevelEntry[]>([
@@ -72,6 +144,10 @@ function CalculatorPage() {
 
   setCourses(courses);
 
+  const formula =
+    await getAdmissionFormula(id);
+
+setFormula(formula);
   setSelectedCourse(null);
   }
 
@@ -88,8 +164,22 @@ function CalculatorPage() {
   }, []);
 
   return (
-    <>
-      <h1>University Aggregate Calculator</h1>
+    <div className="page">
+
+    <header className="hero">
+      <h1>
+        University Aggregate Calculator
+    </h1>
+
+    <p>
+        Calculate your admission aggregate score for
+        Nigerian universities accurately using
+        official admission formulas.
+    </p>
+    </header>
+
+    <div className="top-grid">
+
 
       <UniversityCourseCard
         universities={universities}
@@ -108,12 +198,22 @@ function CalculatorPage() {
       putmeScore={putmeScore}
       setPutmeScore={setPutmeScore}
       />
-
+      </div>
+    <div className="bottom-grid">
+      {
+    errorMessage && (
+        <div className="error-message">
+            {errorMessage}
+        </div>
+    )
+}
       <ResultCard
         aggregateResult={aggregateResult}
         onCalculate={handleCalculate}
+        isCalculating={isCalculating}
       />
-    </>
+    </div>  
+    </div>
   );
 }
 

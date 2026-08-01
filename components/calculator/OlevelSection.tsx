@@ -58,10 +58,10 @@ function OlevelSection({
               }))}
             value={item.subjectId ?? ""}
             onChange={(value) => {
-              const updated = [...olevelSubjects];
-              updated[index].subjectId = value as number;
-              setOlevelSubjects(updated);
-            }}
+            const updated = [...olevelSubjects];
+            updated[index].subjectId = Number(value);
+            setOlevelSubjects(updated);
+          }}
           />
 
           <Select
@@ -70,7 +70,7 @@ function OlevelSection({
             value={item.grade}
             onChange={(value) => {
               const updated = [...olevelSubjects];
-              updated[index].grade = value as string;
+              updated[index].grade = value;
               setOlevelSubjects(updated);
             }}
           />
