@@ -1,6 +1,7 @@
 import api from "./axios";
+import type { University } from "../types/university";
 
-export async function getUniversities() {
+export async function getUniversities(): Promise<University[]> {
     const response = await api.get("/universities");
 
     return response.data;
