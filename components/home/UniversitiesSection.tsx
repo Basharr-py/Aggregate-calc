@@ -1,23 +1,52 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { getUniversities } from "../../api/university";
+import type { University } from "../../types/university";
 import styles from "./UniversitiesSection.module.css";
 
-// Placeholder abbreviations — swap for real logo images when available.
-// The card is built to accept a `logo` src later without changing layout.
-const universities = [
-  { abbr: "UI", name: "University of Ibadan" },
-  { abbr: "UNILAG", name: "University of Lagos" },
-  { abbr: "OAU", name: "Obafemi Awolowo University" },
-  { abbr: "UNILORIN", name: "University of Ilorin" },
-  { abbr: "ABU", name: "Ahmadu Bello University" },
-  { abbr: "UNIBEN", name: "University of Benin" },
-  { abbr: "UNN", name: "University of Nigeria, Nsukka" },
-  { abbr: "COVENANT", name: "Covenant University" },
-  { abbr: "FUTA", name: "Federal University of Technology, Akure" },
-  { abbr: "LASU", name: "Lagos State University" },
+const TOP_UNIVERSITIES = [
+  "UNILAG",
+  "UI",
+  "OAU",
+  "UNILORIN",
+  "ABU",
+  "UNIBEN",
+  "UNN",
+  "UNIPORT",
+  "FUTA",
+  "FUTO",
 ];
 
 export default function UniversitiesSection() {
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadUniversities() {
+      try {
+        const data = await getUniversities();
+
+const topUniversities = TOP_UNIVERSITIES
+  .map((abbr) =>
+    data.find((u) => u.short_name.toUpperCase() === abbr)
+  )
+  .filter(Boolean) as University[];
+
+setUniversities(topUniversities);
+      } catch (error) {
+        // Homepage teaser fails quietly — the full Directory page is where
+        // errors get surfaced properly. No point blocking the rest of the
+        // homepage over this section alone.
+        setUniversities([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadUniversities();
+  }, []);
+
   return (
     <section id="universities" className={styles.section}>
       <div className={styles.inner}>
@@ -28,14 +57,25 @@ export default function UniversitiesSection() {
           </h2>
         </div>
 
-        <div className={styles.grid}>
-          {universities.map((u) => (
-            <div key={u.abbr} className={styles.card}>
-              <span className={styles.abbr}>{u.abbr}</span>
-              <span className={styles.name}>{u.name}</span>
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className={styles.stateMessage}>
+            <Loader2 size={18} className={styles.spinner} strokeWidth={2} />
+            Loading universities...
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {universities.map((u) => (
+              <Link key={u.id} to={`/universities/${u.id}`} className={styles.card}>
+                {u.logo_url ? (
+                  <img src={u.logo_url} alt={`${u.name} logo`} className={styles.logo} />
+                ) : (
+                  <span className={styles.abbr}>{u.short_name}</span>
+                )}
+                <span className={styles.name}>{u.name}</span>
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className={styles.footerRow}>
           <Link to="/universities" className={styles.viewAllBtn}>

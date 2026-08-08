@@ -157,7 +157,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  background: var(--color-card-alt);
+  background: #f1f5f9;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -171,12 +171,12 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--color-border-strong);
+  background: #cbd5e1;
 }
 
 .browserAddress {
   flex: 1;
-  background: var(--color-bg);
+  background: #ffffff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   padding: 5px 12px;
@@ -233,7 +233,7 @@
   align-items: center;
   justify-content: space-between;
   background: var(--color-accent-soft);
-  border: 1px solid rgba(45, 212, 191, 0.3);
+  border: 1px solid #a7f3d0;
   border-radius: var(--radius-sm);
   padding: 12px 14px;
 }
@@ -241,14 +241,14 @@
 .mockResultLabel {
   font-family: var(--font-body);
   font-size: 0.8rem;
-  color: var(--color-accent);
+  color: #047857;
 }
 
 .mockResultValue {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 1.15rem;
-  color: var(--color-accent);
+  color: #047857;
 }
 
 /* ---------- Floating badges: decorative only, opt in from tablet width up ---------- */
@@ -286,7 +286,7 @@
     align-items: center;
     gap: 6px;
     position: absolute;
-    background: rgba(23, 29, 43, 0.85);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--color-border);

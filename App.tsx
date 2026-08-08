@@ -2,8 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import CalculatorPage from "./pages/CalculatorPage/CalculatorPage/CalculatorPage";
 import AboutPage from "./pages/AboutPage";
-import ComingSoonPage from "./pages/ComingSoonPage";
 import UniversitiesPage from "./pages/UniversitiesPage";
+import UniversityDetailPage from "./pages/UniversityDetailPage/UniversityDetailPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         }
       />
       <Route path="/universities" element={<UniversitiesPage />} />
+      <Route path="/universities/:id" element={<UniversityDetailPage />} />
     </Routes>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import styles from "./Navbar.module.css";
-
+import logo from "../../assets/logo1.png";
 type NavItem =
   | { label: string; kind: "anchor"; href: string }
   | { label: string; kind: "route"; to: string };
@@ -49,8 +49,14 @@ export default function Navbar() {
     <header className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
       <div className={styles.inner}>
         <Link to="/" className={styles.logo}>
-          <span className={styles.logoMark} aria-hidden="true" />
-          <span className={styles.logoText}>AdmissionHub</span>
+          <img
+    src={logo}
+    alt="AdmissionHub"
+    className={styles.logoImage}
+  />
+          <span className={styles.logoText}>
+  Admission<span className={styles.logoHub}>Hub</span>
+</span>
         </Link>
 
         <nav className={styles.desktopNav} aria-label="Primary">

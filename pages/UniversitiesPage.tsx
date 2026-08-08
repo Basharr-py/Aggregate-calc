@@ -1,37 +1,36 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, ExternalLink, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, ExternalLink, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "../components/home/Navbar";
 import Footer from "../components/home/Footer";
 import { getUniversities } from "../api/university";
 import type { University } from "../types/university";
 import styles from "./UniversitiesPage.module.css";
 
-/**
- * Normalizes is_active across whatever shape the API actually sends it as
- * (real boolean, "true"/"false" string, or 1/0 number) rather than assuming
- * one specific type. Safer than a bare truthy check since 0 and "0" are
- * both truthy-adjacent traps in JS.
- */
-function isActive(value: unknown): boolean {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return value === 1;
-  if (typeof value === "string") return value.toLowerCase() === "true" || value === "1";
-  return false;
-}
+const PAGE_SIZE = 12;
 
 export default function UniversitiesPage() {
+  const navigate = useNavigate();
   const [universities, setUniversities] = useState<University[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     async function loadUniversities() {
       try {
         setIsLoading(true);
         const data = await getUniversities();
-        console.log("First university (full):", JSON.stringify(data[0], null, 2)); // TEMP DEBUG
-        setUniversities(data.filter((u: University) => isActive(u.is_active)));
+        // NOTE: the API response currently only sends { id, name, short_name,
+        // state, screening_type } — is_active isn't included, so it can't be
+        // filtered here. If inactive universities exist in the DB, they WILL
+        // show up in this list until either:
+        //   (a) the repository query adds .filter(University.is_active == True), or
+        //   (b) the response schema includes is_active and this page filters on it
+        // (a) is the cleaner fix — filtering at the DB level instead of shipping
+        // dead rows to the client at all.
+        setUniversities(data);
       } catch (error) {
         setErrorMessage("Unable to load universities. Please try again.");
       } finally {
@@ -49,6 +48,24 @@ export default function UniversitiesPage() {
       (u) => u.name.toLowerCase().includes(q) || u.short_name.toLowerCase().includes(q)
     );
   }, [universities, search]);
+
+  // Reset to page 1 whenever the search changes, so you never land on a
+  // page that no longer exists for the new result set.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, currentPage]);
+
+  function goToPage(page: number) {
+    const clamped = Math.min(Math.max(page, 1), totalPages);
+    setCurrentPage(clamped);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   return (
     <>
@@ -106,42 +123,86 @@ export default function UniversitiesPage() {
             </div>
           )}
 
-          {!isLoading && !errorMessage && filtered.length > 0 && (
-            <div className={styles.grid}>
-              {filtered.map((u) => (
-                <div key={u.id} className={styles.card}>
-                  <div className={styles.cardTop}>
-                    {u.logo_url ? (
-                      <img src={u.logo_url} alt={`${u.name} logo`} className={styles.logo} />
-                    ) : (
-                      <div className={styles.logoFallback}>{u.short_name.slice(0, 3)}</div>
+          {!isLoading && !errorMessage && paginated.length > 0 && (
+            <>
+              <div className={styles.grid}>
+                {paginated.map((u) => (
+                  <div
+                    key={u.id}
+                    className={styles.card}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/universities/${u.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        navigate(`/universities/${u.id}`);
+                      }
+                    }}
+                  >
+                    <div className={styles.cardTop}>
+                      {u.logo_url ? (
+                        <img src={u.logo_url} alt={`${u.name} logo`} className={styles.logo} />
+                      ) : (
+                        <div className={styles.logoFallback}>{u.short_name.slice(0, 3)}</div>
+                      )}
+                      {u.ownership && (
+                        <span className={styles.ownershipBadge}>{u.ownership}</span>
+                      )}
+                    </div>
+
+                    <h3 className={styles.cardName}>{u.name}</h3>
+                    <p className={styles.cardState}>{u.state} State</p>
+
+                    {u.screening_type === "POST_UTME" && (
+                      <span className={styles.screeningTag}>Post-UTME Required</span>
                     )}
-                    <span className={styles.ownershipBadge}>{u.ownership}</span>
+
+                    <div className={styles.cardFooter}>
+                      {u.website && (
+                        <a
+                          href={u.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.websiteLink}
+                          // Stops the card's own onClick from also firing and
+                          // navigating to the detail page when this link is used.
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Official site
+                          <ExternalLink size={13} strokeWidth={2.2} />
+                        </a>
+                      )}
+                    </div>
                   </div>
+                ))}
+              </div>
 
-                  <h3 className={styles.cardName}>{u.name}</h3>
-                  <p className={styles.cardState}>{u.state} State</p>
+              <div className={styles.pagination}>
+                <button
+                  type="button"
+                  className={styles.pageBtn}
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft size={16} strokeWidth={2.4} />
+                  Previous
+                </button>
 
-                  {u.screening_type === "POST_UTME" && (
-                    <span className={styles.screeningTag}>Post-UTME Required</span>
-                  )}
+                <span className={styles.pageIndicator}>
+                  Page {currentPage} of {totalPages}
+                </span>
 
-                  <div className={styles.cardFooter}>
-                    {u.website && (
-                      <a
-                        href={u.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.websiteLink}
-                      >
-                        Official site
-                        <ExternalLink size={13} strokeWidth={2.2} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                <button
+                  type="button"
+                  className={styles.pageBtn}
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight size={16} strokeWidth={2.4} />
+                </button>
+              </div>
+            </>
           )}
         </div>
       </section>
